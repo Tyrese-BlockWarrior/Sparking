@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -11,14 +12,15 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
+	"sparkingwater/x/sparkingwater/client/cli"
+	"sparkingwater/x/sparkingwater/keeper"
+	"sparkingwater/x/sparkingwater/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"sparkingwater/x/sparkingwater/client/cli"
-	"sparkingwater/x/sparkingwater/keeper"
-	"sparkingwater/x/sparkingwater/types"
 )
 
 var (
@@ -54,7 +56,9 @@ func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns a default GenesisState for the module, marshalled to json.RawMessage. The default GenesisState need to be defined by the module developer and is primarily used for testing
+// DefaultGenesis returns a default GenesisState for the module,
+// marshalled to json.RawMessage. The default GenesisState need to be
+// defined by the module developer and is primarily used for testing
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesis())
 }
@@ -91,7 +95,9 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper        keeper.Keeper
+	keeper keeper.Keeper
+	// TODO(zeke): evaluate if we need these keepers. ignite added
+	// them by default.
 	accountKeeper types.AccountKeeper
 	bankKeeper    types.BankKeeper
 }
@@ -135,8 +141,12 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	var genState types.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
+	moduleAddress := am.accountKeeper.GetModuleAddress(am.Name())
+	if moduleAddress == nil {
+		panic("module has no address")
+	}
 
-	InitGenesis(ctx, am.keeper, genState)
+	InitGenesis(ctx, am.keeper, genState, moduleAddress)
 
 	return []abci.ValidatorUpdate{}
 }

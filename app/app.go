@@ -186,6 +186,11 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		wasm.ModuleName:                {authtypes.Burner},
+		// TODO(zeke): export this from the module like wasmd
+		// in alias.go. As is the way of the SDK, this is
+		// mysteriously needed in order for the module to have
+		// an address in the account keeper.
+		"sparkingwater": nil,
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
