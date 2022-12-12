@@ -1,0 +1,16 @@
+syntax = "proto3";
+package sparkingwater.sparkingwater;
+
+import "gogoproto/gogo.proto";
+import "sparkingwater/sparkingwater/params.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "sparkingwater/x/sparkingwater/types";
+
+// GenesisState defines the sparkingwater module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  // The address of the contract that was instantiated at genisis.
+  string contract =  2;
+  // this line is used by starport scaffolding # genesis/proto/state
+}

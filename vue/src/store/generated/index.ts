@@ -1,8 +1,10 @@
 // THIS FILE IS GENERATED AUTOMATICALLY. DO NOT MODIFY.
 
+import SparkingwaterSparkingwater from './sparkingwater.sparkingwater'
 
 
 export default { 
+  SparkingwaterSparkingwater: load(SparkingwaterSparkingwater, 'sparkingwater.sparkingwater'),
   
 }
 

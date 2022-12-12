@@ -107,6 +107,10 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	sparkingwatermodule "sparkingwater/x/sparkingwater"
+	sparkingwatermodulekeeper "sparkingwater/x/sparkingwater/keeper"
+	sparkingwatermoduletypes "sparkingwater/x/sparkingwater/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "sparkingwater/app/params"
@@ -167,6 +171,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		sparkingwatermodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -243,6 +248,7 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 
+	SparkingwaterKeeper sparkingwatermodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -287,6 +293,7 @@ func New(
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey, evidencetypes.StoreKey,
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		icacontrollertypes.StoreKey, wasm.StoreKey,
+		sparkingwatermoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -531,6 +538,16 @@ func New(
 		govConfig,
 	)
 
+	app.SparkingwaterKeeper = *sparkingwatermodulekeeper.NewKeeper(
+		appCodec,
+		keys[sparkingwatermoduletypes.StoreKey],
+		keys[sparkingwatermoduletypes.MemStoreKey],
+		app.GetSubspace(sparkingwatermoduletypes.ModuleName),
+
+		app.WasmKeeper,
+	)
+	sparkingwaterModule := sparkingwatermodule.NewAppModule(appCodec, app.SparkingwaterKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	// Sealing prevents other modules from creating scoped sub-keepers
@@ -577,6 +594,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		icaModule,
+		sparkingwaterModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -607,6 +625,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		wasm.ModuleName,
+		sparkingwatermoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -632,6 +651,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		wasm.ModuleName,
+		sparkingwatermoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -662,6 +682,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		wasm.ModuleName,
+		sparkingwatermoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -692,6 +713,7 @@ func New(
 		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
+		sparkingwaterModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -892,6 +914,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
+	paramsKeeper.Subspace(sparkingwatermoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
